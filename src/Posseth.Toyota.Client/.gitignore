@@ -1,0 +1,86 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.tmp
+*.temp
+
+# Visual Studio
+.vs/
+*.swp
+*.swo
+
+# Rider
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+*.trx
+
+# Coverage
+*.coverage
+coverage.json
+
+# Environment variables or secrets
+.env
+*.pem
+
+# Build artifacts
+artifacts/
+publish/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Node.js (if any)
+node_modules/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# Resharper
+_ReSharper/
+
+# Dotnet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# User specific
+*.user
+*.suo
+
+# Build
+build/
+dist/
+
+# Secrets
+secrets.json
+appsettings.Development.json
