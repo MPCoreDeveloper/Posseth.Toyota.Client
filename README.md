@@ -1,3 +1,6 @@
+<div align="center">
+  <img src="assets/ToyoCL.png" alt="Posseth Toyota Client logo" width="120" height="120" />
+
 # Posseth.Toyota.Client
 
 [![NuGet](https://img.shields.io/nuget/v/Posseth.Toyota.Client.svg?color=blue)](https://www.nuget.org/packages/Posseth.Toyota.Client/)
@@ -7,11 +10,14 @@
 
 A modern .NET 10 client library for interacting with Toyota's MyToyota Connected Services API. This project provides a fluent, async-first interface to access comprehensive vehicle data including location, status, climate control, remote commands, and more.
 
+</div>
+
 ## 📋 Table of Contents
 
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Dependency Injection](#dependency-injection)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
@@ -21,6 +27,7 @@ A modern .NET 10 client library for interacting with Toyota's MyToyota Connected
 
 - **Async-First**: All operations are fully asynchronous with cancellation token support
 - **Fluent Configuration**: Easy, chainable builder pattern for client setup
+- **Dependency Injection**: First-class `IServiceCollection` integration via `AddToyotaClient()`
 - **Type-Safe**: Strong typing for all API contracts and responses
 - **Comprehensive API**: Access to vehicles, location, climate control, remote commands, trip history, and more
 - **Token Caching**: Automatic token caching to minimize login overhead
@@ -74,9 +81,76 @@ if (result?.IsSuccess == true)
     Console.WriteLine("Climate control started");
 ```
 
+## 💉 Dependency Injection
+
+`Posseth.Toyota.Client` ships with built-in support for the [.NET Options pattern](https://learn.microsoft.com/dotnet/core/extensions/options) and `Microsoft.Extensions.DependencyInjection`.
+
+### Option A — Inline lambda (recommended for simple setups)
+
+```csharp
+// Program.cs
+using Posseth.Toyota.Client.Extensions;
+
+builder.Services.AddToyotaClient(options =>
+{
+    options.Username       = builder.Configuration["Toyota:Username"]!;
+    options.Password       = builder.Configuration["Toyota:Password"]!;
+    options.TimeoutSeconds = 30;
+    options.Logger         = msg => Console.WriteLine(msg); // optional
+});
+```
+
+### Option B — Bind from `appsettings.json`
+
+Add a section to your `appsettings.json`:
+
+```json
+{
+  "ToyotaClient": {
+    "Username": "your@email.com",
+    "Password": "your-password",
+    "TimeoutSeconds": 30,
+    "UseTokenCaching": true
+  }
+}
+```
+
+Then register:
+
+```csharp
+// Program.cs
+using Posseth.Toyota.Client;
+using Posseth.Toyota.Client.Extensions;
+
+builder.Services.AddToyotaClient(
+    builder.Configuration.GetSection(ToyotaClientOptions.SectionName));
+```
+
+### Consuming `IMyToyotaClient`
+
+Once registered, inject `IMyToyotaClient` anywhere in your application:
+
+```csharp
+public class VehicleService(IMyToyotaClient client)
+{
+    public async Task<string?> GetFirstVinAsync(CancellationToken ct = default)
+    {
+        await client.LoginAsync(ct);
+        var vehicles = await client.GetVehiclesAsync(ct);
+        return vehicles?.Data?.FirstOrDefault()?.Vin;
+    }
+}
+```
+
+> **Security tip:** Never store credentials in `appsettings.json` for production.  
+> Use [Secret Manager](https://learn.microsoft.com/aspnet/core/security/app-secrets) in development  
+> and [Azure Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview) or environment variables in production.
+
+For a full walkthrough see **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)**.
+
 ## 📚 Documentation
 
-- **[Getting Started](docs/GETTING_STARTED.md)** - Installation, configuration, and common tasks
+- **[Getting Started](docs/GETTING_STARTED.md)** - Installation, configuration, DI setup, and common tasks
 - **[API Reference](docs/API.md)** - Complete API documentation with examples
 - **[Architecture](docs/ARCHITECTURE.md)** - Design overview and component details
 
@@ -86,15 +160,18 @@ if (result?.IsSuccess == true)
 Posseth.Toyota.Client/
 ├── src/
 │   └── Posseth.Toyota.Client/          # Main client library
+│       ├── Extensions/                 # DI extension methods
 │       ├── Interfaces/                 # Public API contracts
 │       ├── Models/                     # API response/request models
 │       ├── Services/                   # Core business logic
 │       ├── Exceptions/                 # Custom exception types
-│       └── MyToyotaClient.cs           # Main public API
+│       └── ToyotaClientOptions.cs      # DI / Options-pattern configuration
 ├── samples/
 │   └── Posseth.Toyota.Demo.ConsoleApp/ # Example usage
 ├── tests/
 │   └── Posseth.Toyota.Client.Tests/    # Unit and integration tests
+├── assets/
+│   └── logo.svg                        # Project logo
 └── docs/                               # Documentation
 ```
 
@@ -197,7 +274,3 @@ Use at your own risk. The authors assume no responsibility for any misuse, damag
 - 💡 [Request Features](https://github.com/MPCoreDeveloper/Posseth.Toyota.Client/issues)
 - 📖 [View Documentation](docs/)
 - 📧 [Check Discussions](https://github.com/MPCoreDeveloper/Posseth.Toyota.Client/discussions)
-
----
-
-**Made with ❤️ by Michel Posseth** | [GitHub](https://github.com/MPCoreDeveloper) | [LinkedIn](https://www.linkedin.com/in/michel-posseth/)

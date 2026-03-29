@@ -1,4 +1,25 @@
+<div align="center">
+  <img src="../assets/ToyoCL.png" alt="Posseth Toyota Client logo" width="90" height="90" />
+</div>
+
 # Getting Started
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Standalone Usage (no DI)](#standalone-usage-no-di)
+- [Dependency Injection](#dependency-injection)
+  - [ASP.NET Core / Generic Host](#aspnet-core--generic-host)
+  - [Option A — Inline lambda](#option-a--inline-lambda)
+  - [Option B — appsettings.json binding](#option-b--appsettingsjson-binding)
+  - [Injecting the client](#injecting-the-client)
+  - [Credentials management](#credentials-management)
+- [Common Tasks](#common-tasks)
+- [Cancellation](#cancellation)
+- [Error Handling](#error-handling)
+- [Environment Variables](#environment-variables)
+
+---
 
 ## Installation
 
@@ -14,32 +35,29 @@ Or via NuGet Package Manager:
 Install-Package Posseth.Toyota.Client
 ```
 
-## Quick Start
+---
 
-### 1. Create a Client
+## Standalone Usage (no DI)
+
+If you are building a console app or any project that does not use a DI container,
+you can create the client directly using the fluent builder API:
 
 ```csharp
-using Posseth.Toyota.Client;
-using Posseth.Toyota.Client.Models;
+using Posseth.Toyota.Client.Services;
+using Posseth.Toyota.Client.Interfaces;
 
-var client = new MyToyotaClient()
-    .UseCredentials("your-username", "your-password")
+IMyToyotaClient client = new MyToyotaClient()
+    .UseCredentials("your@email.com", "your-password")
     .UseTimeout(30)
-    .UseTokenCaching(true);
-```
+    .UseTokenCaching(true)
+    .UseLogger(msg => Console.WriteLine(msg));  // optional
 
-### 2. Authenticate
-
-```csharp
 var loginSuccess = await client.LoginAsync();
 if (!loginSuccess)
-{
-    Console.WriteLine("Login failed");
-    return;
-}
+    throw new InvalidOperationException("Login failed");
 ```
 
-### 3. Get Vehicles
+### Get Vehicles
 
 ```csharp
 var vehicles = await client.GetVehiclesAsync();
@@ -52,16 +70,153 @@ if (vehicles?.Data != null)
 }
 ```
 
-### 4. Get Vehicle Status
+### Get Vehicle Status
 
 ```csharp
-var vin = "JTHJP5C27D5012345"; // Your vehicle VIN
+var vin = "JTHJP5C27D5012345";
 var location = await client.GetLocationAsync(vin);
 Console.WriteLine($"Location: {location?.Data?.Latitude}, {location?.Data?.Longitude}");
 
 var electric = await client.GetElectricAsync(vin);
 Console.WriteLine($"Battery Level: {electric?.Data?.BatteryLevel}%");
 ```
+
+---
+
+## Dependency Injection
+
+`Posseth.Toyota.Client` ships with first-class support for the
+[.NET Options pattern](https://learn.microsoft.com/dotnet/core/extensions/options)
+and `Microsoft.Extensions.DependencyInjection`.
+
+The library exposes `IMyToyotaClient` as the public abstraction and provides
+`AddToyotaClient()` extension methods on `IServiceCollection`.
+
+### ASP.NET Core / Generic Host
+
+Add the using directive once in `Program.cs`:
+
+```csharp
+using Posseth.Toyota.Client.Extensions;
+```
+
+---
+
+### Option A — Inline lambda
+
+Use the lambda overload when you want to configure the client directly in code,
+e.g. reading from environment variables or a secrets manager:
+
+```csharp
+// Program.cs
+builder.Services.AddToyotaClient(options =>
+{
+    options.Username       = builder.Configuration["Toyota:Username"]!;
+    options.Password       = builder.Configuration["Toyota:Password"]!;
+    options.TimeoutSeconds = 30;
+    options.UseTokenCaching = true;
+    options.Logger         = msg => Console.WriteLine(msg); // optional
+});
+```
+
+---
+
+### Option B — `appsettings.json` binding
+
+Add a dedicated section to your `appsettings.json`:
+
+```json
+{
+  "ToyotaClient": {
+    "Username": "your@email.com",
+    "Password": "your-password",
+    "TimeoutSeconds": 30,
+    "UseTokenCaching": true,
+    "TokenCacheFilename": "toyota_token_cache.json"
+  }
+}
+```
+
+Then pass the section to `AddToyotaClient`:
+
+```csharp
+// Program.cs
+using Posseth.Toyota.Client;
+using Posseth.Toyota.Client.Extensions;
+
+builder.Services.AddToyotaClient(
+    builder.Configuration.GetSection(ToyotaClientOptions.SectionName));
+```
+
+> **`ToyotaClientOptions.SectionName`** is the string constant `"ToyotaClient"`.
+
+---
+
+### Injecting the client
+
+Once registered, inject `IMyToyotaClient` into any service, controller, or minimal-API handler:
+
+#### Constructor injection (recommended)
+
+```csharp
+using Posseth.Toyota.Client.Interfaces;
+
+public class VehicleService(IMyToyotaClient client)
+{
+    public async Task<string?> GetFirstVinAsync(CancellationToken ct = default)
+    {
+        await client.LoginAsync(ct);
+        var vehicles = await client.GetVehiclesAsync(ct);
+        return vehicles?.Data?.FirstOrDefault()?.Vin;
+    }
+}
+```
+
+Register the service and wire it up:
+
+```csharp
+builder.Services.AddScoped<VehicleService>();
+```
+
+#### Minimal API
+
+```csharp
+app.MapGet("/vehicles", async (IMyToyotaClient client, CancellationToken ct) =>
+{
+    await client.LoginAsync(ct);
+    return await client.GetVehiclesAsync(ct);
+});
+```
+
+#### `IOptions<ToyotaClientOptions>` — reading options directly
+
+If you need to read the configured options elsewhere:
+
+```csharp
+using Microsoft.Extensions.Options;
+using Posseth.Toyota.Client;
+
+public class MyDiagnosticsService(IOptions<ToyotaClientOptions> options)
+{
+    public string GetConfiguredUsername() => options.Value.Username;
+}
+```
+
+---
+
+### Credentials management
+
+| Environment | Recommended approach |
+|---|---|
+| Local development | [.NET Secret Manager](https://learn.microsoft.com/aspnet/core/security/app-secrets) |
+| CI / staging | Environment variables |
+| Production | [Azure Key Vault](https://learn.microsoft.com/azure/key-vault) / secrets provider |
+
+**Never** commit credentials to source control.  
+The token cache file (`toyota_credentials_cache_contains_secrets.json` by default)
+should also be added to `.gitignore`.
+
+---
 
 ## Common Tasks
 
@@ -70,9 +225,7 @@ Console.WriteLine($"Battery Level: {electric?.Data?.BatteryLevel}%");
 ```csharp
 var result = await client.StartClimateControlAsync(vin);
 if (result?.IsSuccess == true)
-{
     Console.WriteLine("Climate control started");
-}
 ```
 
 ### Lock Vehicle
@@ -80,9 +233,7 @@ if (result?.IsSuccess == true)
 ```csharp
 var result = await client.SendRemoteCommandAsync(vin, RemoteCommandType.Lock);
 if (result?.IsSuccess == true)
-{
     Console.WriteLine("Vehicle locked");
-}
 ```
 
 ### Get Trip History
@@ -92,15 +243,13 @@ var trips = await client.GetTripsAsync(
     vin,
     from: DateOnly.FromDateTime(DateTime.Now.AddDays(-7)),
     to: DateOnly.FromDateTime(DateTime.Now),
-    route: true,      // Include route data
-    summary: true,    // Include summary
+    route: true,
+    summary: true,
     limit: 50
 );
 
 foreach (var trip in trips?.Data ?? [])
-{
     Console.WriteLine($"Trip: {trip.StartTime} - Distance: {trip.Distance}km");
-}
 ```
 
 ### Refresh Climate Status
@@ -110,45 +259,47 @@ var status = await client.RefreshClimateStatusAsync(vin);
 Console.WriteLine($"Climate Status: {status?.Data?.Status}");
 ```
 
+---
+
 ## Configuration Options
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `Username` | `string` | — | MyToyota account e-mail |
+| `Password` | `string` | — | MyToyota account password |
+| `TimeoutSeconds` | `int` | `60` | HTTP request timeout |
+| `UseTokenCaching` | `bool` | `true` | Cache the bearer token to disk |
+| `TokenCacheFilename` | `string` | `toyota_credentials_cache_contains_secrets.json` | Token cache file path |
+| `Logger` | `Action<string>?` | `null` | Optional diagnostic logger |
 
 ### Timeout
 
-Set request timeout (in seconds):
-
 ```csharp
-client.UseTimeout(60);  // 60 second timeout
+options.TimeoutSeconds = 60;
 ```
 
 ### Logging
 
-Enable logging for debugging:
-
 ```csharp
-client.UseLogger(message => Console.WriteLine(message));
+// Console
+options.Logger = message => Console.WriteLine(message);
 
-// Or with structured logging
-client.UseLogger(message => logger.LogInformation(message));
+// Bridge to Microsoft.Extensions.Logging
+options.Logger = message => logger.LogDebug("{Message}", message);
 ```
 
 ### Token Caching
 
-Configure token caching:
-
 ```csharp
-// Enable caching (default: true)
-client.UseTokenCaching(true);
-
-// Set custom cache file location
-client.UseTokenCacheFilename("my_tokens.json");
-
-// Disable caching (tokens must be re-acquired each session)
-client.UseTokenCaching(false);
+options.UseTokenCaching     = true;
+options.TokenCacheFilename  = "my_tokens.json";
 ```
+
+---
 
 ## Cancellation
 
-All async methods support cancellation:
+All async methods accept a `CancellationToken`:
 
 ```csharp
 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -162,6 +313,8 @@ catch (OperationCanceledException)
     Console.WriteLine("Operation was cancelled");
 }
 ```
+
+---
 
 ## Error Handling
 
@@ -188,41 +341,26 @@ catch (TimeoutException)
 }
 ```
 
+---
+
 ## Environment Variables
 
-You can use environment variables for sensitive data:
+You can read credentials from environment variables to avoid hardcoding them:
 
 ```csharp
-var username = Environment.GetEnvironmentVariable("TOYOTA_USERNAME")
-    ?? throw new InvalidOperationException("TOYOTA_USERNAME not set");
-var password = Environment.GetEnvironmentVariable("TOYOTA_PASSWORD")
-    ?? throw new InvalidOperationException("TOYOTA_PASSWORD not set");
-
+// Standalone
 var client = new MyToyotaClient()
-    .UseCredentials(username, password);
-```
+    .UseCredentials(
+        Environment.GetEnvironmentVariable("TOYOTA_USERNAME")
+            ?? throw new InvalidOperationException("TOYOTA_USERNAME not set"),
+        Environment.GetEnvironmentVariable("TOYOTA_PASSWORD")
+            ?? throw new InvalidOperationException("TOYOTA_PASSWORD not set"));
 
-## Dependency Injection (ASP.NET Core)
-
-```csharp
-services.AddSingleton<IMyToyotaClient>(serviceProvider =>
-    new MyToyotaClient()
-        .UseCredentials(
-            configuration["Toyota:Username"],
-            configuration["Toyota:Password"]
-        )
-        .UseTimeout(int.Parse(configuration["Toyota:TimeoutSeconds"]))
-        .UseLogger(serviceProvider.GetRequiredService<ILogger<MyToyotaClient>>().LogInformation)
-);
-```
-
-## Examples
-
-See the `samples/` directory for complete working examples.
-
-## Next Steps
-
-- Check [API Documentation](./API.md) for detailed method reference
-- Review [Architecture](./ARCHITECTURE.md) for design details
-- Look at the [samples](../samples/) for real-world usage
-- Report issues and request features on [GitHub Issues](https://github.com/MPCoreDeveloper/Posseth.Toyota.Client/issues)
+// DI / lambda
+builder.Services.AddToyotaClient(options =>
+{
+    options.Username = Environment.GetEnvironmentVariable("TOYOTA_USERNAME")
+        ?? throw new InvalidOperationException("TOYOTA_USERNAME not set");
+    options.Password = Environment.GetEnvironmentVariable("TOYOTA_PASSWORD")
+        ?? throw new InvalidOperationException("TOYOTA_PASSWORD not set");
+});

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Posseth.Toyota.Client/Posseth.Toyota.Client.csproj" />
+  </Folder>
+  <Folder Name="/src/Posseth.Toyota.Demo.Console.App/">
+    <Project Path="src/Posseth.Toyota.Demo.Console.App/Posseth.Toyota.Demo.ConsoleApp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Posseth.Toyota.Client.Tests/Posseth.Toyota.Client.Tests.csproj" />
+  </Folder>
+</Solution>
