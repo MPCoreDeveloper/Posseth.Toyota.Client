@@ -46,6 +46,8 @@ namespace Posseth.Toyota.Client.Const
         public static readonly string VEHICLE_CLIMATE_STATUS_ENDPOINT = _configuration["VehicleClimateStatusEndpoint"] ?? throw new InvalidOperationException("VehicleClimateStatusEndpoint not found in configuration.");
         public static readonly string VEHICLE_CLIMATE_STATUS_REFRESH_ENDPOINT = _configuration["VehicleClimateStatusRefreshEndpoint"] ?? throw new InvalidOperationException("VehicleClimateStatusRefreshEndpoint not found in configuration.");
         public static readonly string VEHICLE_COMMAND_ENDPOINT = _configuration["VehicleCommandEndpoint"] ?? throw new InvalidOperationException("VehicleCommandEndpoint not found in configuration.");
+        public static readonly string VEHICLE_DRIVING_STATISTICS_ENDPOINT = _configuration["VehicleDrivingStatisticsEndpoint"] ?? throw new InvalidOperationException("VehicleDrivingStatisticsEndpoint not found in configuration.");
+        public static readonly string VEHICLE_LOCK_STATUS_ENDPOINT = _configuration["VehicleLockStatusEndpoint"] ?? throw new InvalidOperationException("VehicleLockStatusEndpoint not found in configuration.");
 
         // API Key
         public static readonly string API_KEY = _configuration["ApiKey"] ?? throw new InvalidOperationException("ApiKey not found in configuration.");

@@ -1,104 +1,203 @@
-# Posseth.Toyota
+# Posseth.Toyota.Client
 
-A .NET client library for interacting with Toyota Connected Services API. This project provides a fluent interface to access vehicle data such as location, health status, electric information, and more.
+[![NuGet](https://img.shields.io/nuget/v/Posseth.Toyota.Client.svg?color=blue)](https://www.nuget.org/packages/Posseth.Toyota.Client/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/download)
+[![C#](https://img.shields.io/badge/C%23-14.0-blue.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 
-## Projects
+A modern .NET 10 client library for interacting with Toyota's MyToyota Connected Services API. This project provides a fluent, async-first interface to access comprehensive vehicle data including location, status, climate control, remote commands, and more.
 
-- **Posseth.Toyota.Client**: The main client library.
-- **Posseth.Toyota.Demo.ConsoleApp**: A console application demonstrating the usage of the client.
-- **Posseth.Toyota.Client.Tests**: Unit and integration tests for the client.
+## 📋 Table of Contents
 
-## Requirements
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
+- [Disclaimer](#disclaimer)
 
-- .NET 10
-- Toyota Connected Services account
+## ✨ Features
 
-## Installation
+- **Async-First**: All operations are fully asynchronous with cancellation token support
+- **Fluent Configuration**: Easy, chainable builder pattern for client setup
+- **Type-Safe**: Strong typing for all API contracts and responses
+- **Comprehensive API**: Access to vehicles, location, climate control, remote commands, trip history, and more
+- **Token Caching**: Automatic token caching to minimize login overhead
+- **Error Handling**: Precise exceptions for different failure scenarios
+- **Performance**: Built with .NET 10 and C# 14 for optimal performance
 
-Clone the repository and build the solution.
+## 📦 Installation
 
-```bash
-git clone <repository-url>
-cd Posseth.Toyota
-dotnet build
-```
-
-## Usage
-
-### Console Demo
-
-To run the demo console app:
-
-1. Ensure you have a Toyota Connected Services account.
-2. Set your credentials in environment variables or files as described in the console app.
-3. Run the console app:
+Install the NuGet package:
 
 ```bash
-dotnet run --project Posseth.Toyota.Demo.ConsoleApp
+dotnet add package Posseth.Toyota.Client
 ```
 
-### Using the Client Library
+Or via Package Manager:
+
+```
+Install-Package Posseth.Toyota.Client
+```
+
+## 🚀 Quick Start
 
 ```csharp
-using Posseth.Toyota.Client.Services;
-using Posseth.Toyota.Client.Interfaces;
+using Posseth.Toyota.Client;
 
+// Create and configure the client
 var client = new MyToyotaClient()
-    .UseCredentials("username", "password")
-    .UseTimeout(30);
+    .UseCredentials("your-username", "your-password")
+    .UseTimeout(30)
+    .UseTokenCaching(true);
 
-await client.LoginAsync();
+// Authenticate
+var loginSuccess = await client.LoginAsync();
+if (!loginSuccess)
+    throw new InvalidOperationException("Login failed");
+
+// Get your vehicles
 var vehicles = await client.GetVehiclesAsync();
-// ... use other methods
+foreach (var vehicle in vehicles?.Data ?? [])
+{
+    Console.WriteLine($"VIN: {vehicle.Vin}, Name: {vehicle.Nickname}");
+}
+
+// Get vehicle status
+var location = await client.GetLocationAsync("JTHJP5C27D5012345");
+Console.WriteLine($"Location: {location?.Data?.Latitude}, {location?.Data?.Longitude}");
+
+// Control your vehicle
+var result = await client.StartClimateControlAsync("JTHJP5C27D5012345");
+if (result?.IsSuccess == true)
+    Console.WriteLine("Climate control started");
 ```
 
-## Testing
+## 📚 Documentation
 
-The test project includes unit tests for constants and integration tests for API methods.
+- **[Getting Started](docs/GETTING_STARTED.md)** - Installation, configuration, and common tasks
+- **[API Reference](docs/API.md)** - Complete API documentation with examples
+- **[Architecture](docs/ARCHITECTURE.md)** - Design overview and component details
 
-To run tests:
+## 📁 Project Structure
 
-1. Set environment variables `TOYOTA_USERNAME` and `TOYOTA_PASSWORD` with your credentials.
-2. Run:
+```
+Posseth.Toyota.Client/
+├── src/
+│   └── Posseth.Toyota.Client/          # Main client library
+│       ├── Interfaces/                 # Public API contracts
+│       ├── Models/                     # API response/request models
+│       ├── Services/                   # Core business logic
+│       ├── Exceptions/                 # Custom exception types
+│       └── MyToyotaClient.cs           # Main public API
+├── samples/
+│   └── Posseth.Toyota.Demo.ConsoleApp/ # Example usage
+├── tests/
+│   └── Posseth.Toyota.Client.Tests/    # Unit and integration tests
+└── docs/                               # Documentation
+```
+
+## 🛠️ Requirements
+
+- **.NET 10+** or later
+- **C# 14** (or later)
+- **Toyota Connected Services Account**
+
+## 🧪 Testing
+
+To run the test suite:
 
 ```bash
+# Unit tests
+dotnet test
+
+# With coverage (requires dotnet-coverage)
+dotnet-coverage collect -f cobertura -o coverage.cobertura.xml dotnet test
+```
+
+### Environment Variables for Tests
+
+Integration tests require valid Toyota credentials:
+
+```bash
+export TOYOTA_USERNAME=your-username
+export TOYOTA_PASSWORD=your-password
 dotnet test
 ```
 
-Note: Integration tests require valid Toyota credentials and will make real API calls.
+## 🎯 Supported Features
 
-## Contributing
+### Vehicle Information
+- Get all associated vehicles
+- Get vehicle association details
 
-Please ensure tests pass and follow the code style.
+### Electric/EV Status
+- Battery level and charging status
+- Real-time EV status data
 
-## Credits
+### Climate Control
+- Get climate settings and status
+- Start/stop climate control
+- Refresh climate status
+
+### Remote Commands
+- Lock/unlock vehicle
+- Start/stop engine
+- Control lights
+- Open trunk
+- Hazard lights
+
+### Vehicle Telemetry
+- Current location
+- Lock status (doors, trunk, windows)
+- Health diagnostics
+- Telemetry data
+- Service history
+- Driving statistics and eco-scores
+
+### Trip Management
+- Trip history with optional route data
+- Trip summaries
+- Trip statistics
+
+### Notifications
+- Recent vehicle notifications
+
+## 🔒 Security
+
+- **Never hardcode credentials** - Use environment variables or configuration files
+- **Token caching** is enabled by default but can be disabled if needed
+- **Secure storage** - Consider using Azure Key Vault or similar for sensitive data in production
+- See [SECURITY.md](SECURITY.md) for more details
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📜 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+Copyright © 2026 Michel Posseth (MPCoreDeveloper)
+
+### Attribution
 
 This project is based on [Abraham.MyToyotaClient](https://github.com/abraham/MyToyotaClient), which is licensed under the Apache License 2.0. We acknowledge and thank the original author for their work.
 
-## License
+## ⚠️ Disclaimer
 
-MIT License
+**This is an unofficial client library and is not affiliated with, endorsed by, or associated with Toyota Motor Corporation or any of its subsidiaries.**
 
-Copyright (c) [2026] [Michel Posseth A.K.A. MPCoreDeveloper]
+Use at your own risk. The authors assume no responsibility for any misuse, damage, or issues arising from the use of this library. Ensure you comply with Toyota's Terms of Service and respect their API usage policies.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 📞 Support
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+- 🐛 [Report Issues](https://github.com/MPCoreDeveloper/Posseth.Toyota.Client/issues)
+- 💡 [Request Features](https://github.com/MPCoreDeveloper/Posseth.Toyota.Client/issues)
+- 📖 [View Documentation](docs/)
+- 📧 [Check Discussions](https://github.com/MPCoreDeveloper/Posseth.Toyota.Client/discussions)
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+---
 
-## Disclaimer
-
-This is an unofficial client and not affiliated with Toyota. Use at your own risk.
+**Made with ❤️ by Michel Posseth** | [GitHub](https://github.com/MPCoreDeveloper) | [LinkedIn](https://www.linkedin.com/in/michel-posseth/)

@@ -204,4 +204,169 @@ namespace Posseth.Toyota.Client.Models
         public string? serviceProvider { get; set; }
         public string? serviceHistoryId { get; set; }
     }
+
+    // --- Trips ---
+
+    public class TripsResponseModel
+    {
+        public object? status { get; set; }
+        public List<Trip>? payload { get; set; }
+    }
+
+    public class Trip
+    {
+        public string? tripId { get; set; }
+        public string? startAddress { get; set; }
+        public string? endAddress { get; set; }
+        public double? startLatitude { get; set; }
+        public double? startLongitude { get; set; }
+        public double? endLatitude { get; set; }
+        public double? endLongitude { get; set; }
+        public string? startTime { get; set; }
+        public string? endTime { get; set; }
+        public RangeValue? distance { get; set; }
+        public int? duration { get; set; }
+        public double? fuelConsumption { get; set; }
+        public string? fuelConsumptionUnit { get; set; }
+        public double? averageSpeed { get; set; }
+        public string? averageSpeedUnit { get; set; }
+        public double? maxSpeed { get; set; }
+        public List<TripRoute>? route { get; set; }
+        public TripSummary? summary { get; set; }
+    }
+
+    public class TripRoute
+    {
+        public double? latitude { get; set; }
+        public double? longitude { get; set; }
+    }
+
+    public class TripSummary
+    {
+        public RangeValue? distance { get; set; }
+        public int? duration { get; set; }
+        public double? fuelConsumption { get; set; }
+        public string? fuelConsumptionUnit { get; set; }
+        public double? averageSpeed { get; set; }
+    }
+
+    // --- Climate Control ---
+
+    public class ClimateSettingsResponseModel
+    {
+        public object? status { get; set; }
+        public ClimateSettingsPayload? payload { get; set; }
+    }
+
+    public class ClimateSettingsPayload
+    {
+        public double? temperature { get; set; }
+        public string? temperatureUnit { get; set; }
+        public bool? defogger { get; set; }
+        public bool? rearDefogger { get; set; }
+        public string? blowerSpeed { get; set; }
+        public bool? steeringWheelHeater { get; set; }
+        public bool? seatHeater { get; set; }
+    }
+
+    public class ClimateStatusResponseModel
+    {
+        public object? status { get; set; }
+        public ClimateStatusPayload? payload { get; set; }
+    }
+
+    public class ClimateStatusPayload
+    {
+        public bool? climateRunning { get; set; }
+        public double? cabinTemperature { get; set; }
+        public string? cabinTemperatureUnit { get; set; }
+        public string? lastUpdated { get; set; }
+        public string? remainingRunTime { get; set; }
+    }
+
+    public class ClimateControlResponseModel
+    {
+        public object? status { get; set; }
+        public ClimateControlPayload? payload { get; set; }
+    }
+
+    public class ClimateControlPayload
+    {
+        public string? appRequestNo { get; set; }
+        public string? returnCode { get; set; }
+    }
+
+    // --- Remote Command ---
+
+    public class RemoteCommandResponseModel
+    {
+        public object? status { get; set; }
+        public RemoteCommandPayload? payload { get; set; }
+    }
+
+    public class RemoteCommandPayload
+    {
+        public string? appRequestNo { get; set; }
+        public string? returnCode { get; set; }
+    }
+
+    // --- Vehicle Association ---
+
+    public class VehicleAssociationResponseModel
+    {
+        public object? status { get; set; }
+        public List<object>? payload { get; set; }
+    }
+
+    // --- Driving Statistics ---
+
+    public class DrivingStatisticsResponseModel
+    {
+        public object? status { get; set; }
+        public DrivingStatisticsPayload? payload { get; set; }
+    }
+
+    public class DrivingStatisticsPayload
+    {
+        public double? averageFuelConsumption { get; set; }
+        public string? averageFuelConsumptionUnit { get; set; }
+        public double? averageSpeed { get; set; }
+        public string? averageSpeedUnit { get; set; }
+        public double? totalDistance { get; set; }
+        public string? totalDistanceUnit { get; set; }
+        public int? totalTrips { get; set; }
+        public int? totalDuration { get; set; }
+        public double? ecoScore { get; set; }
+        public double? accelerationScore { get; set; }
+        public double? brakingScore { get; set; }
+    }
+
+    // --- Lock Status ---
+
+    public class LockStatusResponseModel
+    {
+        public object? status { get; set; }
+        public LockStatusPayload? payload { get; set; }
+    }
+
+    public class LockStatusPayload
+    {
+        public string? overallLockState { get; set; }
+        public string? lastUpdated { get; set; }
+        public List<DoorLockStatus>? doors { get; set; }
+        public TrunkLockStatus? trunk { get; set; }
+    }
+
+    public class DoorLockStatus
+    {
+        public string? door { get; set; }
+        public string? lockState { get; set; }
+        public string? openState { get; set; }
+    }
+
+    public class TrunkLockStatus
+    {
+        public string? lockState { get; set; }
+        public string? openState { get; set; }
+    }
 }

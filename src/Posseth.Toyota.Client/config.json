@@ -20,5 +20,7 @@
   "VehicleClimateStatusEndpoint": "/v1/global/remote/climate-status",
   "VehicleClimateStatusRefreshEndpoint": "/v1/global/remote/refresh-climate-status",
   "VehicleCommandEndpoint": "/v1/global/remote/command",
+  "VehicleDrivingStatisticsEndpoint": "/v1/driving-statistics",
+  "VehicleLockStatusEndpoint": "/v1/global/remote/lock-status",
   "ApiKey": "tTZipv6liF74PwMfk9Ed68AQ0bISswwf3iHQdqcF"
 }

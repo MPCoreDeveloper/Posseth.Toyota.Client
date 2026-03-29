@@ -1,5 +1,6 @@
-﻿using Posseth.Toyota.Client.Const;
+using Posseth.Toyota.Client.Const;
 using Posseth.Toyota.Client.Interfaces;
+using Posseth.Toyota.Client.Models;
 using Posseth.Toyota.Client.Services;
 using Xunit;
 
@@ -237,6 +238,117 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vin);
             var result = await client.GetServiceHistoryAsync(vin);
             Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task GetTripsAsync_ShouldReturnData()
+        {
+            var client = CreateClient();
+            await client.LoginAsync();
+            var vehicles = await client.GetVehiclesAsync();
+            Assert.NotNull(vehicles);
+            Assert.NotNull(vehicles.Payload);
+            Assert.True(vehicles.Payload.Any());
+            var vehicle = vehicles.Payload[0];
+            Assert.NotNull(vehicle);
+            var vin = vehicle.Vin;
+            Assert.NotNull(vin);
+            var to = DateOnly.FromDateTime(DateTime.Today);
+            var from = to.AddDays(-30);
+            var result = await client.GetTripsAsync(vin, from, to);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task GetClimateSettingsAsync_ShouldReturnData()
+        {
+            var client = CreateClient();
+            await client.LoginAsync();
+            var vehicles = await client.GetVehiclesAsync();
+            Assert.NotNull(vehicles);
+            Assert.NotNull(vehicles.Payload);
+            Assert.True(vehicles.Payload.Any());
+            var vehicle = vehicles.Payload[0];
+            Assert.NotNull(vehicle);
+            var vin = vehicle.Vin;
+            Assert.NotNull(vin);
+            var result = await client.GetClimateSettingsAsync(vin);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task GetClimateStatusAsync_ShouldReturnData()
+        {
+            var client = CreateClient();
+            await client.LoginAsync();
+            var vehicles = await client.GetVehiclesAsync();
+            Assert.NotNull(vehicles);
+            Assert.NotNull(vehicles.Payload);
+            Assert.True(vehicles.Payload.Any());
+            var vehicle = vehicles.Payload[0];
+            Assert.NotNull(vehicle);
+            var vin = vehicle.Vin;
+            Assert.NotNull(vin);
+            var result = await client.GetClimateStatusAsync(vin);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task GetVehicleAssociationAsync_ShouldReturnData()
+        {
+            var client = CreateClient();
+            await client.LoginAsync();
+            var result = await client.GetVehicleAssociationAsync();
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task GetDrivingStatisticsAsync_ShouldReturnData()
+        {
+            var client = CreateClient();
+            await client.LoginAsync();
+            var vehicles = await client.GetVehiclesAsync();
+            Assert.NotNull(vehicles);
+            Assert.NotNull(vehicles.Payload);
+            Assert.True(vehicles.Payload.Any());
+            var vehicle = vehicles.Payload[0];
+            Assert.NotNull(vehicle);
+            var vin = vehicle.Vin;
+            Assert.NotNull(vin);
+            var result = await client.GetDrivingStatisticsAsync(vin);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task GetLockStatusAsync_ShouldReturnData()
+        {
+            var client = CreateClient();
+            await client.LoginAsync();
+            var vehicles = await client.GetVehiclesAsync();
+            Assert.NotNull(vehicles);
+            Assert.NotNull(vehicles.Payload);
+            Assert.True(vehicles.Payload.Any());
+            var vehicle = vehicles.Payload[0];
+            Assert.NotNull(vehicle);
+            var vin = vehicle.Vin;
+            Assert.NotNull(vin);
+            var result = await client.GetLockStatusAsync(vin);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void RemoteCommandType_HasExpectedValues()
+        {
+            var values = Enum.GetValues<RemoteCommandType>();
+            Assert.Contains(RemoteCommandType.DoorLock, values);
+            Assert.Contains(RemoteCommandType.DoorUnlock, values);
+            Assert.Contains(RemoteCommandType.EngineStart, values);
+            Assert.Contains(RemoteCommandType.EngineStop, values);
+            Assert.Contains(RemoteCommandType.HazardOn, values);
+            Assert.Contains(RemoteCommandType.HazardOff, values);
+            Assert.Contains(RemoteCommandType.HeadLightOn, values);
+            Assert.Contains(RemoteCommandType.HeadLightOff, values);
+            Assert.Contains(RemoteCommandType.TrunkOpen, values);
         }
     }
 }

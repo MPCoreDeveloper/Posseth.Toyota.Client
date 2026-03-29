@@ -539,9 +539,9 @@ public class MyToyotaClient : IMyToyotaClient
             var request = CreateRequest(HttpMethod.Post, endpoint, vin);
             // Ensure the POST body is consistent with what the API expects, even for empty POSTs
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
-            
+
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            
+
             if (response.StatusCode != System.Net.HttpStatusCode.OK && 
                 response.StatusCode != System.Net.HttpStatusCode.Found)
             {
@@ -550,6 +550,23 @@ public class MyToyotaClient : IMyToyotaClient
                 throw new InvalidOperationException($"Could not retrieve information from Toyota API: {response.StatusCode}");
             }
 
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+        }
+
+        private async Task<T?> SendRequestWithBodyAsync<T>(HttpMethod method, string endpoint, object body, string? vin = null, CancellationToken cancellationToken = default)
+        {
+            var request = CreateRequest(method, endpoint, vin);
+            var json = JsonSerializer.Serialize(body, _jsonOptions);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Found)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger?.Invoke($"API {method} request failed: {response.StatusCode}, Content: {errorContent}");
+                throw new InvalidOperationException($"Could not retrieve information from Toyota API: {response.StatusCode}");
+            }
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
         }
@@ -582,5 +599,67 @@ public class MyToyotaClient : IMyToyotaClient
         public Task<ServiceHistoryResponseModel?> GetServiceHistoryAsync(string vin, CancellationToken cancellationToken = default) =>
 
             SendRequestAsync<ServiceHistoryResponseModel>(HttpMethod.Get, Constants.VEHICLE_SERVICE_HISTORY_ENDPOINT, vin, cancellationToken);
+
+        // --- Trips ---
+
+        /// <inheritdoc />
+        public Task<TripsResponseModel?> GetTripsAsync(string vin, DateOnly from, DateOnly to, bool route = false, bool summary = true, int limit = 50, int offset = 0, CancellationToken cancellationToken = default)
+        {
+            var endpoint = Constants.VEHICLE_TRIPS_ENDPOINT
+                .Replace("{from_date}", from.ToString("yyyy-MM-dd"))
+                .Replace("{to_date}", to.ToString("yyyy-MM-dd"))
+                .Replace("{route}", route.ToString().ToLowerInvariant())
+                .Replace("{summary}", summary.ToString().ToLowerInvariant())
+                .Replace("{limit}", limit.ToString())
+                .Replace("{offset}", offset.ToString());
+
+            return SendRequestAsync<TripsResponseModel>(HttpMethod.Get, endpoint, vin, cancellationToken);
+        }
+
+        // --- Climate Control ---
+
+        /// <inheritdoc />
+        public Task<ClimateSettingsResponseModel?> GetClimateSettingsAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestAsync<ClimateSettingsResponseModel>(HttpMethod.Get, Constants.VEHICLE_CLIMATE_SETTINGS_ENDPOINT, vin, cancellationToken);
+
+        /// <inheritdoc />
+        public Task<ClimateStatusResponseModel?> GetClimateStatusAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestAsync<ClimateStatusResponseModel>(HttpMethod.Get, Constants.VEHICLE_CLIMATE_STATUS_ENDPOINT, vin, cancellationToken);
+
+        /// <inheritdoc />
+        public Task<ClimateControlResponseModel?> RefreshClimateStatusAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestAsync<ClimateControlResponseModel>(HttpMethod.Post, Constants.VEHICLE_CLIMATE_STATUS_REFRESH_ENDPOINT, vin, cancellationToken);
+
+        /// <inheritdoc />
+        public Task<ClimateControlResponseModel?> StartClimateControlAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestWithBodyAsync<ClimateControlResponseModel>(HttpMethod.Post, Constants.VEHICLE_CLIMATE_CONTROL_ENDPOINT, new { command = "start" }, vin, cancellationToken);
+
+        /// <inheritdoc />
+        public Task<ClimateControlResponseModel?> StopClimateControlAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestWithBodyAsync<ClimateControlResponseModel>(HttpMethod.Post, Constants.VEHICLE_CLIMATE_CONTROL_ENDPOINT, new { command = "stop" }, vin, cancellationToken);
+
+        // --- Remote Commands ---
+
+        /// <inheritdoc />
+        public Task<RemoteCommandResponseModel?> SendRemoteCommandAsync(string vin, RemoteCommandType command, CancellationToken cancellationToken = default) =>
+            SendRequestWithBodyAsync<RemoteCommandResponseModel>(HttpMethod.Post, Constants.VEHICLE_COMMAND_ENDPOINT, new { command = command.ToString() }, vin, cancellationToken);
+
+        // --- Vehicle Association ---
+
+        /// <inheritdoc />
+        public Task<VehicleAssociationResponseModel?> GetVehicleAssociationAsync(CancellationToken cancellationToken = default) =>
+            SendRequestAsync<VehicleAssociationResponseModel>(HttpMethod.Get, Constants.VEHICLE_ASSOCIATION_ENDPOINT, null, cancellationToken);
+
+        // --- Driving Statistics ---
+
+        /// <inheritdoc />
+        public Task<DrivingStatisticsResponseModel?> GetDrivingStatisticsAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestAsync<DrivingStatisticsResponseModel>(HttpMethod.Get, Constants.VEHICLE_DRIVING_STATISTICS_ENDPOINT, vin, cancellationToken);
+
+        // --- Lock Status ---
+
+        /// <inheritdoc />
+        public Task<LockStatusResponseModel?> GetLockStatusAsync(string vin, CancellationToken cancellationToken = default) =>
+            SendRequestAsync<LockStatusResponseModel>(HttpMethod.Get, Constants.VEHICLE_LOCK_STATUS_ENDPOINT, vin, cancellationToken);
 
     }
