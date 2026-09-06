@@ -86,7 +86,7 @@ namespace Posseth.Toyota.Client.Tests
         public async Task LoginAsync_ShouldSucceed()
         {
             var client = CreateClient();
-            var result = await client.LoginAsync();
+            var result = await client.LoginAsync(TestContext.Current.CancellationToken);
             Assert.True(result);
         }
 
@@ -94,8 +94,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetVehiclesAsync_ShouldReturnVehicles()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -105,8 +105,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetElectricAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -114,7 +114,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetElectricAsync(vin);
+            var result = await client.GetElectricAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
             // Add more assertions based on expected data
         }
@@ -123,8 +123,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetElectricRealtimeStatusAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -132,18 +132,18 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetElectricRealtimeStatusAsync(vin);
+            var result = await client.GetElectricRealtimeStatusAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
             // Wait for the car to be contacted, as in the console app
-            await Task.Delay(2 * 60 * 1000); // Wait 2 minutes
+            await Task.Delay(2 * 60 * 1000, TestContext.Current.CancellationToken); // Wait 2 minutes
         }
 
         [Fact]
         public async Task GetLocationAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -151,7 +151,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetLocationAsync(vin);
+            var result = await client.GetLocationAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -159,8 +159,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetHealthStatusAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -168,7 +168,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetHealthStatusAsync(vin);
+            var result = await client.GetHealthStatusAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -176,8 +176,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetTelemetryStatusAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -185,7 +185,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetTelemetryStatusAsync(vin);
+            var result = await client.GetTelemetryStatusAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -193,8 +193,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetNotificationsAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -202,7 +202,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetNotificationsAsync(vin);
+            var result = await client.GetNotificationsAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -210,8 +210,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetRemoteStatusAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -219,7 +219,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetRemoteStatusAsync(vin);
+            var result = await client.GetRemoteStatusAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -227,8 +227,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetServiceHistoryAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -236,7 +236,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetServiceHistoryAsync(vin);
+            var result = await client.GetServiceHistoryAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -244,8 +244,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetTripsAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -255,7 +255,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vin);
             var to = DateOnly.FromDateTime(DateTime.Today);
             var from = to.AddDays(-30);
-            var result = await client.GetTripsAsync(vin, from, to);
+            var result = await client.GetTripsAsync(vin, from, to, cancellationToken: TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -263,8 +263,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetClimateSettingsAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -272,7 +272,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetClimateSettingsAsync(vin);
+            var result = await client.GetClimateSettingsAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -280,8 +280,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetClimateStatusAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -289,7 +289,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetClimateStatusAsync(vin);
+            var result = await client.GetClimateStatusAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -297,8 +297,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetVehicleAssociationAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var result = await client.GetVehicleAssociationAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var result = await client.GetVehicleAssociationAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -306,8 +306,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetDrivingStatisticsAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -315,7 +315,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetDrivingStatisticsAsync(vin);
+            var result = await client.GetDrivingStatisticsAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -323,8 +323,8 @@ namespace Posseth.Toyota.Client.Tests
         public async Task GetLockStatusAsync_ShouldReturnData()
         {
             var client = CreateClient();
-            await client.LoginAsync();
-            var vehicles = await client.GetVehiclesAsync();
+            await client.LoginAsync(TestContext.Current.CancellationToken);
+            var vehicles = await client.GetVehiclesAsync(TestContext.Current.CancellationToken);
             Assert.NotNull(vehicles);
             Assert.NotNull(vehicles.Payload);
             Assert.True(vehicles.Payload.Any());
@@ -332,7 +332,7 @@ namespace Posseth.Toyota.Client.Tests
             Assert.NotNull(vehicle);
             var vin = vehicle.Vin;
             Assert.NotNull(vin);
-            var result = await client.GetLockStatusAsync(vin);
+            var result = await client.GetLockStatusAsync(vin, TestContext.Current.CancellationToken);
             Assert.NotNull(result);
         }
 
@@ -352,3 +352,4 @@ namespace Posseth.Toyota.Client.Tests
         }
     }
 }
+

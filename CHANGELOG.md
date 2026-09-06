@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded NuGet packages to latest stable (Microsoft.Extensions.* 10.0.11, System.IdentityModel.Tokens.Jwt 8.22.0, Microsoft.NET.Test.Sdk 18.9.0). xUnit remains on the v3 line (3.2.2) to keep the plain `dotnet test` (VSTest) workflow; the xUnit v3 4.0 line requires the Microsoft.Testing.Platform runner and is noted as a follow-up.
+- Replaced the static `config.json`-backed `Constants` with injectable `ToyotaApiSettings` (endpoints/URLs/key now configurable via DI with baked-in defaults).
+- TLS/SSL certificate validation is now **enabled by default**; opt out per client via `UseBypassSslValidation(true)` or `ToyotaClientOptions.BypassSslValidation`.
+- Token-expiry timestamps now use UTC.
+- Removed dead code: unused `PostAsync` helper and the unimplemented `IToyotaRestClient`/`ToyotaApiResponse`.
+
+### Added
+
+- `ToyotaApiSettings` options class and `ToyotaApi` configuration section.
+- Offline unit tests (settings defaults, DI registration, request building) that do not require live credentials.
+
+### Fixed
+
+- Duplicate/private request plumbing consolidated into a single `SendCoreAsync` helper; request/response objects are disposed.
+
 ## [1.1.0] - 2025-06-29
 
 ### Added

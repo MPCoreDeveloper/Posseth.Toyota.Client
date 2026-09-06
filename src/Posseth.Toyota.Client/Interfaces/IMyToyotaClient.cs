@@ -10,6 +10,7 @@ namespace Posseth.Toyota.Client.Interfaces
         IMyToyotaClient UseCredentials(string username, string password);
         IMyToyotaClient UseLogger(Action<string> logger);
         IMyToyotaClient UseTimeout(int timeoutSeconds);
+        IMyToyotaClient UseBypassSslValidation(bool bypassSslValidation);
         IMyToyotaClient UseTokenCacheFilename(string tokenCacheFilename);
         IMyToyotaClient UseTokenCaching(bool useTokenCaching);
 

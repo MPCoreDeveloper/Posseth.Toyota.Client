@@ -38,7 +38,6 @@ namespace Posseth.Toyota.Demo.ConsoleApp
             }
 
             // Initialize the client with modern fluent interface
-            // Using ToyotaRestClient instead of MyToyotaClient
             IMyToyotaClient client = new MyToyotaClient()
                 .UseCredentials(username, password)
                 .UseLogger(message => Console.WriteLine($"[Client] {message}"))

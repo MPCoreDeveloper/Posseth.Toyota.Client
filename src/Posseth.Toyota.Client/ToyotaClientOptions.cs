@@ -73,6 +73,16 @@ public sealed class ToyotaClientOptions
         "toyota_credentials_cache_contains_secrets.json";
 
     /// <summary>
+    /// Gets or sets whether TLS/SSL certificate validation is bypassed.
+    /// Defaults to <see langword="false"/> (secure).
+    /// </summary>
+    /// <remarks>
+    /// Only enable this for debugging against proxies or non-production environments.
+    /// Disabling certificate validation makes the connection vulnerable to man-in-the-middle attacks.
+    /// </remarks>
+    public bool BypassSslValidation { get; set; }
+
+    /// <summary>
     /// Gets or sets an optional delegate that receives diagnostic log messages from the client.
     /// </summary>
     /// <example>

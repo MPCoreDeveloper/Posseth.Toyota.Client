@@ -53,6 +53,8 @@ public static class ServiceCollectionExtensions
                 .Configure(configure)
                 .ValidateOnStart();
 
+        services.AddOptions<ToyotaApiSettings>();
+
         RegisterClient(services);
         return services;
     }
@@ -96,6 +98,10 @@ public static class ServiceCollectionExtensions
                 .Bind(configuration)
                 .ValidateOnStart();
 
+        // Optional: bind ToyotaApiSettings from a "ToyotaApi" sub-section when present.
+        services.AddOptions<ToyotaApiSettings>()
+                .Bind(configuration.GetSection(ToyotaApiSettings.SectionName));
+
         RegisterClient(services);
         return services;
     }
@@ -105,10 +111,12 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IMyToyotaClient>(static sp =>
         {
             var options = sp.GetRequiredService<IOptions<ToyotaClientOptions>>().Value;
+            var apiSettings = sp.GetRequiredService<IOptions<ToyotaApiSettings>>().Value;
 
-            IMyToyotaClient client = new MyToyotaClient()
+            IMyToyotaClient client = new MyToyotaClient(apiSettings)
                 .UseCredentials(options.Username, options.Password)
                 .UseTimeout(options.TimeoutSeconds)
+                .UseBypassSslValidation(options.BypassSslValidation)
                 .UseTokenCaching(options.UseTokenCaching)
                 .UseTokenCacheFilename(options.TokenCacheFilename);
 

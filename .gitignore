@@ -84,3 +84,6 @@ dist/
 # Secrets
 secrets.json
 appsettings.Development.json
+
+# Toyota token cache (contains plaintext credentials/tokens)
+toyota_credentials_cache_contains_secrets.json
