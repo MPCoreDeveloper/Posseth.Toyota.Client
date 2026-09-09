@@ -87,5 +87,18 @@ public sealed class ToyotaApiSettings
     /// <summary>
     /// API key sent in the <c>x-api-key</c> request header.
     /// </summary>
-    public string ApiKey { get; set; } = "tTZipv6liF74PwMfk9Ed68AQ0bISswwf3iHQdqcF";
+    /// <remarks>
+    /// <para>
+    /// This is a credential and is intentionally <b>not</b> hard-coded in this library.
+    /// Supply it through the <c>ToyotaApi:ApiKey</c> configuration section, the
+    /// <c>TOYOTA_API_KEY</c> environment variable, or the inline
+    /// <see cref="ToyotaApiSettings"/> options.
+    /// </para>
+    /// <code>
+    /// "ToyotaApi": {
+    ///   "ApiKey": "your-api-key"
+    /// }
+    /// </code>
+    /// </remarks>
+    public string ApiKey { get; set; } = string.Empty;
 }

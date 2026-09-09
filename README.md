@@ -50,6 +50,15 @@ Install-Package Posseth.Toyota.Client
 
 ## 🚀 Quick Start
 
+> **Security note:** The Toyota API key is a credential and is **not** baked into the library.
+> Provide it through the `TOYOTA_API_KEY` environment variable (read automatically when the
+> client is created without explicit `ToyotaApiSettings`) or via the `ToyotaApi:ApiKey`
+> configuration section:
+>
+> ```bash
+> export TOYOTA_API_KEY=your-api-key
+> ```
+
 ```csharp
 using Posseth.Toyota.Client;
 
@@ -111,6 +120,9 @@ Add a section to your `appsettings.json`:
     "Password": "your-password",
     "TimeoutSeconds": 30,
     "UseTokenCaching": true
+  },
+  "ToyotaApi": {
+    "ApiKey": "your-api-key"
   }
 }
 ```
@@ -200,6 +212,7 @@ Integration tests require valid Toyota credentials:
 ```bash
 export TOYOTA_USERNAME=your-username
 export TOYOTA_PASSWORD=your-password
+export TOYOTA_API_KEY=your-api-key
 dotnet test
 ```
 

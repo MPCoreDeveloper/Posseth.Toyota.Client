@@ -35,6 +35,8 @@ public class MyToyotaClient : IMyToyotaClient
     private bool _useTokenCaching = true;
     private bool _bypassSslValidation;
     private string _tokenCacheFilename = "toyota_credentials_cache_contains_secrets.json";
+    private readonly string _apiKey;
+    private bool _warnedAboutMissingApiKey;
 
     // Constructors
     public MyToyotaClient()
@@ -55,6 +57,14 @@ public class MyToyotaClient : IMyToyotaClient
     public MyToyotaClient(ToyotaApiSettings settings, HttpClientHandler? customHandler = null)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+
+        // SECURITY: The API key is a credential and must not be baked into the library.
+        // When it is not supplied through ToyotaApiSettings, fall back to the TOYOTA_API_KEY
+        // environment variable so the client works without a hard-coded secret.
+        _apiKey = string.IsNullOrWhiteSpace(_settings.ApiKey)
+            ? Environment.GetEnvironmentVariable("TOYOTA_API_KEY") ?? string.Empty
+            : _settings.ApiKey;
+
         _handler = customHandler ?? new HttpClientHandler();
 
         // Configure the handler for this service
@@ -489,9 +499,22 @@ public class MyToyotaClient : IMyToyotaClient
 
         var uuid4 = Guid.NewGuid().ToString("D").ToUpperInvariant();
 
-        // Add headers in the exact same way as RestSharp
-        request.Headers.Add("x-api-key", _settings.ApiKey);
-        request.Headers.Add("API_KEY", _settings.ApiKey);
+        // Add the API key headers only when a key is configured. HttpRequestHeaders.Add
+        // throws ArgumentException for empty values, so omitting the headers entirely is safer
+        // than silently sending an empty credential to the API.
+        if (string.IsNullOrEmpty(_apiKey))
+        {
+            if (!_warnedAboutMissingApiKey)
+            {
+                _warnedAboutMissingApiKey = true;
+                _logger?.Invoke("No Toyota API key configured. Set 'ToyotaApi:ApiKey' or the 'TOYOTA_API_KEY' environment variable.");
+            }
+        }
+        else
+        {
+            request.Headers.Add("x-api-key", _apiKey);
+            request.Headers.Add("API_KEY", _apiKey);
+        }
 
         if (_tokenCache is not null)
         {

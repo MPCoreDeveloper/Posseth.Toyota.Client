@@ -22,7 +22,8 @@ public class OfflineUnitTests
         var settings = new ToyotaApiSettings();
 
         Assert.False(string.IsNullOrWhiteSpace(settings.ApiBaseUrl));
-        Assert.False(string.IsNullOrWhiteSpace(settings.ApiKey));
+        // SECURITY: The API key is a credential and has no built-in default anymore.
+        Assert.Empty(settings.ApiKey);
         Assert.False(string.IsNullOrWhiteSpace(settings.AccessTokenUrl));
         Assert.False(string.IsNullOrWhiteSpace(settings.AuthorizeUrl));
         Assert.False(string.IsNullOrWhiteSpace(settings.AuthenticateUrl));
@@ -30,6 +31,18 @@ public class OfflineUnitTests
         Assert.Contains("{from_date}", settings.VehicleTripsEndpoint);
         Assert.Contains("{offset}", settings.VehicleTripsEndpoint);
         Assert.Equal(Constants.CLIENT_VERSION, settings.ClientVersion);
+    }
+
+    [Fact]
+    public void ToyotaApiSettings_ApiKey_CanBeConfigured()
+    {
+        // SECURITY: The API key has no built-in default; it must be supplied by the application,
+        // either through ToyotaApiSettings directly or via configuration.
+        var settings = new ToyotaApiSettings { ApiKey = "configured-key" };
+        Assert.Equal("configured-key", settings.ApiKey);
+
+        settings.ApiKey = "rotated-key";
+        Assert.Equal("rotated-key", settings.ApiKey);
     }
 
     [Fact]
